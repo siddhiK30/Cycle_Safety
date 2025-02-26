@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Win-Tech Landing Page</title>
+    
+    <style>
+       * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --primary-purple: #6B46C1;
+            --light-purple: #9F7AEA;
+            --dark-purple: #44337A;
+        }
+
+        body {
+            overflow: hidden;
+            background-color: black;
+        }
+
+        .landing {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .landing video {
+            width: 110%;
+            height: 110%;
+            object-fit: cover;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.8;
+            filter: brightness(0.7) contrast(1.2);
+        }
+
+        .landing::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(0, 0, 0, 0.5),
+                rgba(107, 70, 193, 0.3)
+            );
+            z-index: 1;
+        }
+
+        .content {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            text-align: center;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        .tagline {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 2rem;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            font-weight: bold;
+            animation: slideIn 1s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            background-color: var(--primary-purple);
+            color: white;
+            border: 2px solid var(--light-purple);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 15px rgba(159, 122, 234, 0.3);
+            animation: pulseButton 2s infinite;
+        }
+
+        @keyframes pulseButton {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 4px 15px rgba(159, 122, 234, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 4px 20px rgba(159, 122, 234, 0.5);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 4px 15px rgba(159, 122, 234, 0.3);
+            }
+        }
+
+        .cta-button:hover {
+            background-color: var(--light-purple);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(159, 122, 234, 0.5);
+            animation: none;
+        }
+
+        .cta-button:active {
+            background-color: var(--dark-purple);
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(159, 122, 234, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="landing">
+        <video autoplay muted loop playsinline>
+            <source src="https://res.cloudinary.com/dbzwrqq3n/video/upload/f_auto:video,q_auto/k64aijnt6wttle4fnarw" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="content">
+            <h1 class="tagline">Transform Your Cycling Experience</h1>
+            <button id="getStartedButton" class="cta-button">Let's Get Started</button>
+        </div>
+    </div>
+    
+</body>
+<script>
+    document.getElementById("getStartedButton").addEventListener("click", function() {
+        window.location.href = "/login/"; // Change this URL to match your Django login route
+    });
+</script>
+
+</html>

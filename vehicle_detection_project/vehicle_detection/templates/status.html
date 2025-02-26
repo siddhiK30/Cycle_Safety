@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Processing Status</title>
+</head>
+<body>
+    <h1>Processing Status</h1>
+    
+    {% if result.processed_video %}
+        <h3>Processed Video:</h3>
+        <video width="640" height="360" controls>
+            <source src="{{ result.processed_video.url }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    {% else %}
+        <p>Processing is still ongoing. Please refresh the page later.</p>
+    {% endif %}
+    
+    <a href="{% url 'results_list' %}">Back to Results</a>
+</body>
+</html>

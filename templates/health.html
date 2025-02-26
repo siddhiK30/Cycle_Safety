@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Status & Maintenance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4B0082;
+            --secondary-color: #663399;
+            --accent-color: #B19CD9;
+            --background-color: #0A0A0A;
+            --card-background: #141414;
+            --card-background-lighter: #1F1F1F;
+            --text-primary: #ffffff;
+            --text-secondary: #9D8AA8;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --border-radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+        }
+
+        .header h1 {
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-card {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .component-list {
+            list-style: none;
+        }
+
+        .component-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: var(--card-background-lighter);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 1rem;
+        }
+
+        .status-good {
+            background-color: var(--success-color);
+        }
+
+        .status-warning {
+            background-color: var(--warning-color);
+        }
+
+        .status-critical {
+            background-color: var(--danger-color);
+        }
+
+        .maintenance-list {
+            list-style: none;
+        }
+
+        .maintenance-item {
+            padding: 1rem;
+            background: var(--card-background-lighter);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .maintenance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .maintenance-title {
+            font-weight: 600;
+        }
+
+        .maintenance-priority {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+        }
+
+        .priority-high {
+            background: var(--danger-color);
+        }
+
+        .priority-medium {
+            background: var(--warning-color);
+        }
+
+        .priority-low {
+            background: var(--success-color);
+        }
+
+        .damage-map {
+            background: var(--card-background-lighter);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .map-title {
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .map-image {
+            width: 100%;
+            height: 200px;
+            background: var(--card-background);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-bicycle"></i> Vehicle Status Report</h1>
+            <p>Last Ride: October 15, 2023 • Duration: 2h 15m • Distance: 45km</p>
+        </header>
+
+        <div class="status-grid">
+            <!-- Pre-Ride Status -->
+            <div class="status-card">
+                <h2 class="card-title">
+                    <i class="fas fa-clock-rotate-left"></i>
+                    Pre-Ride Status
+                </h2>
+                <ul class="component-list">
+                    <li class="component-item">
+                        <span class="status-indicator status-good"></span>
+                        <div>
+                            <strong>Tire Pressure</strong>
+                            <p>Front: 35 PSI, Rear: 38 PSI</p>
+                        </div>
+                    </li>
+                    <li class="component-item">
+                        <span class="status-indicator status-good"></span>
+                        <div>
+                            <strong>Brake System</strong>
+                            <p>Pads: 80% remaining</p>
+                        </div>
+                    </li>
+                    <li class="component-item">
+                        <span class="status-indicator status-warning"></span>
+                        <div>
+                            <strong>Chain Tension</strong>
+                            <p>Slight adjustment needed</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Post-Ride Status -->
+            <div class="status-card">
+                <h2 class="card-title">
+                    <i class="fas fa-clock"></i>
+                    Post-Ride Status
+                </h2>
+                <ul class="component-list">
+                    <li class="component-item">
+                        <span class="status-indicator status-warning"></span>
+                        <div>
+                            <strong>Tire Pressure</strong>
+                            <p>Front: 32 PSI, Rear: 34 PSI</p>
+                        </div>
+                    </li>
+                    <li class="component-item">
+                        <span class="status-indicator status-critical"></span>
+                        <div>
+                            <strong>Brake System</strong>
+                            <p>Front pad wear detected</p>
+                        </div>
+                    </li>
+                    <li class="component-item">
+                        <span class="status-indicator status-critical"></span>
+                        <div>
+                            <strong>Chain Tension</strong>
+                            <p>Immediate adjustment required</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Maintenance Recommendations -->
+        <div class="status-card">
+            <h2 class="card-title">
+                <i class="fas fa-wrench"></i>
+                Maintenance Recommendations
+            </h2>
+            <ul class="maintenance-list">
+                <li class="maintenance-item">
+                    <div class="maintenance-header">
+                        <span class="maintenance-title">Replace Front Brake Pads</span>
+                        <span class="maintenance-priority priority-high">High Priority</span>
+                    </div>
+                    <p>Excessive wear detected after encountering multiple steep descents</p>
+                </li>
+                <li class="maintenance-item">
+                    <div class="maintenance-header">
+                        <span class="maintenance-title">Adjust Chain Tension</span>
+                        <span class="maintenance-priority priority-high">High Priority</span>
+                    </div>
+                    <p>Chain stress detected from rough terrain and potholes</p>
+                </li>
+                <li class="maintenance-item">
+                    <div class="maintenance-header">
+                        <span class="maintenance-title">Tire Pressure Check</span>
+                        <span class="maintenance-priority priority-medium">Medium Priority</span>
+                    </div>
+                    <p>Pressure loss detected after rough terrain sections</p>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Damage Map -->
+        <div class="damage-map">
+            <h2 class="map-title"><i class="fas fa-map-marked-alt"></i> Route Condition Analysis</h2>
+            <div class="component-list">
+                <li class="component-item">
+                    <i class="fas fa-exclamation-triangle" style="color: var(--warning-color); margin-right: 1rem;"></i>
+                    <div>
+                        <strong>Pothole Cluster</strong>
+                        <p>Multiple potholes detected at km 23-25</p>
+                    </div>
+                </li>
+                <li class="component-item">
+                    <i class="fas fa-road" style="color: var(--danger-color); margin-right: 1rem;"></i>
+                    <div>
+                        <strong>Rough Surface</strong>
+                        <p>Gravel section at km 30-32 impacting tire wear</p>
+                    </div>
+                </li>
+                <li class="component-item">
+                    <i class="fas fa-hill-rockslide" style="color: var(--warning-color); margin-right: 1rem;"></i>
+                    <div>
+                        <strong>Steep Descent</strong>
+                        <p>Heavy brake usage at km 38-40</p>
+                    </div>
+                </li>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

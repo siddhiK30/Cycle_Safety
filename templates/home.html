@@ -1,0 +1,261 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BICYKLE - Activity Dashboard</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css">
+    <link rel="stylesheet" href="{% static 'home/home.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            
+            <nav class="nav-menu">
+                <div class="nav-item active">
+                    <span>🏠</span>
+                    Home
+                </div>
+                <a href="/home/area_flag/" class="nav-item">
+                    <span>🔔</span>
+                    <span>Area and Crowd Flag</span>
+                </a>
+                <a href="/home/anomoly/" class="nav-item">
+                    <span>💳</span>
+                    <span>Anamalous Path</span>
+                </a>
+                <a href="/home/profile/" class="nav-item">
+                    <span>⚡</span>
+                    <span>RiderSafe Analytics</span>
+                </a>
+                <a href="/home/health/" class="nav-item">
+                    <span>📁</span>
+                    <span>Bicycle Health</span>
+                </a>
+                <a href="/home/mumbai_map/" class="nav-item">
+                    <span>📍</span>
+                    <span>Offline Support</span>
+                </a>
+               
+            </nav>
+            <div class="nearby-users">
+                <h3>Nearby Users</h3>
+                
+               <h2> Siddhi</h2>
+              
+            </div>
+        
+            <button id="help-button">Connect +</button>
+        </div>
+
+        <div class="main-content">
+            <header class="header">
+                <div class="alert-container">
+                    <div class="alert-message">
+                        <span class="alert-icon">⚠️</span>
+                        <div class="msg">
+                            You are on a terrain!
+                        </div>
+                    </div>
+                    <div class="buttons-container">
+                        <button id="sosButton" class="sos-button">SOS</button>
+                         <button id="nearbyUsersButton" class="nearby-users-button">Nearby Users</button>
+                    </div>
+                </div>
+            
+                <!-- Popup for nearby users -->
+                <div id="nearbyUsersPopup" class="popup">
+                    <div class="popup-content">
+                        <div class="popup-header">
+                            
+                            <span class="close-button">&times;</span>
+                        </div>
+                        <div class="users-list">
+                            <div class="user-card">
+                                <div class="user-info">
+                                   
+                                </div>
+                            </div>
+                            <div class="user-card">
+                                <div class="user-info">
+                                    
+                                </div>
+                                
+                            </div>
+                            <div class="user-card">
+                                <div class="user-info">
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+           
+
+            <div class="dashboard">
+                <div class="left-section">
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        
+                                <div class="map-container">
+                                    <div id="alertBox" class="alert">
+                                        <strong>Alert!</strong><br>
+                                        <span id="alertMessage">Confirm if you are safe.</span><br>
+                                        <button onclick="handleConfirmSafety()" class="safe-button">I'm Safe</button>
+                                    </div>
+                                    <div id="map"></div>
+                                    <div id="voiceControls">
+                                        <button onclick="toggleVoiceGuidance()" class="voice-button" id="voiceToggle">Enable Voice</button>
+                                        <button onclick="speakCurrentInstruction()" class="voice-button">Repeat Instruction</button>
+                                    </div>
+                                </div>
+
+                        <div class="speed-tracker">
+                            <div class="svg-title">
+                                <h1>Speed</h1>
+                                <svg class="speedometer" viewBox="0 0 160 100">
+                                    <!-- Background track -->
+                                    <path 
+                                        class="speedometer-track"
+                                        d="M10,90 A70,70 0 0,1 150,90" 
+                                        fill="none" 
+                                        stroke="#333" 
+                                        stroke-width="3"
+                                    />
+                                        
+                                    <!-- Speed indicator -->
+                                    <path 
+                                        class="speedometer-value"
+                                        d="M10,90 A70,70 0 0,1 10,90" 
+                                        fill="none" 
+                                        stroke="#4CAF50" 
+                                        stroke-width="3"
+                                        stroke-linecap="round"
+                                    />
+                                        
+                                    <!-- Tick marks -->
+                                    <g id="ticks">
+                                        <line x1="10" y1="90" x2="15" y2="85" stroke="#666" />
+                                        <line x1="45" y1="65" x2="50" y2="60" stroke="#666" />
+                                        <line x1="85" y1="50" x2="90" y2="45" stroke="#666" />
+                                        <line x1="125" y1="65" x2="130" y2="60" stroke="#666" />
+                                        <line x1="150" y1="90" x2="145" y2="85" stroke="#666" />
+                                    </g>
+                                        
+                                    <!-- Speed labels -->
+                                    <text x="5" y="100" fill="#666" font-size="10">0</text>
+                                    <text x="80" y="40" fill="#666" font-size="10">20</text>
+                                    <text x="145" y="100" fill="#666" font-size="10">40</text>
+                                </svg>
+                        
+                                <div class="current-speed">
+                                    0.0 <span class="speed-unit">km/h</span>
+                                </div>
+                            </div>
+                        
+                            <div class="stat-info">
+                                <div class="stat">
+                                    <div>Avg</div>
+                                    <div class="stat-value average-speed">0.0</div>
+                                </div>
+                                <div class="stat">
+                                    <div>Max</div>
+                                    <div class="stat-value max-speed">0.0</div>
+                                </div>
+                                <div class="stat">
+                                    <div>Dist</div>
+                                    <div class="stat-value total-distance">0.0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>   
+                </div>
+            </div>
+            <!-- <div class="camera-grid">
+                <div class="fatigue-detection">
+                    <h2>Driver Fatigue Detection</h2>
+                    <div class="camera-feed">
+                        <video id="videoFeed" autoplay playsinline></video>
+                        <div class="detection-overlay">
+                            <div id="detectionStatus" class="detection-status status-awake">Awake</div>
+                            <div id="alertMessage" class="alert-message">
+                                Alert! You seem tired. Please take a break.
+                            </div>
+                        </div>
+                    </div>
+                </div>x
+            </div>
+            <div class="dashboard-grid">
+                <div class="map-container">
+                    <div id="alertBox" class="alert">
+                        <strong>Alert!</strong><br>
+                        <span id="alertMessage">Confirm if you are safe.</span><br>
+                        <button onclick="handleConfirmSafety()" class="safe-button">I'm Safe</button>
+                    </div>
+                    <div id="map"></div>
+                    <div id="voiceControls">
+                        <button onclick="toggleVoiceGuidance()" class="voice-button" id="voiceToggle">Enable Voice</button>
+                        <button onclick="speakCurrentInstruction()" class="voice-button">Repeat Instruction</button>
+                    </div>
+                </div>
+            </div> -->
+            <div class="dashboard-content">
+                <div class="camera-grid">
+                    <div class="fatigue-detection">
+                        <h2>Driver Fatigue Detection</h2>
+                        <div class="camera-feed">
+                            <video id="videoFeed" autoplay playsinline></video>
+                            <div class="detection-overlay">
+                                <div id="detectionStatus" class="detection-status status-awake"></div>
+                                <div id="alertMessage" class="alert-message">
+                                    Alert! You seem tired. Please take a break.
+                                </div>
+                            </div>
+                        </div>
+                    
+                   
+                </div>
+                <div class="vehicle-detection">
+                    <h2>Vehicle Detection System</h2>
+                    <div class="camera-feed">
+                        <video id="vehicleVideoFeed" autoplay controls playsinline>
+                            <source src="https://res.cloudinary.com/dbzwrqq3n/video/upload/f_auto:video,q_auto/fpfbadiuyk864bp8rlp6" type="video/mp4">
+                        </video>
+                        <div class="detection-overlay">
+                            <div id="vehicleStatus" class="detection-status status-awake">Safe Distance</div>
+                        </div>
+                    </div>
+                   
+                </div>
+            
+    
+                <!-- <div class="map-container">
+                    <div id="alertBox" class="alert">
+                        <strong>Alert!</strong><br>
+                        <span id="alertMessage">Confirm if you are safe.</span><br>
+                        <button onclick="handleConfirmSafety()" class="safe-button">I'm Safe</button>
+                    </div>
+                    <div id="map"></div>
+                    <div id="voiceControls">
+                        <button onclick="toggleVoiceGuidance()" class="voice-button" id="voiceToggle">Enable Voice</button>
+                        <button onclick="speakCurrentInstruction()" class="voice-button">Repeat Instruction</button>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+    </div>
+
+    <audio id="alertSound" class="alert-sound" loop>
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD929_2fv2MRVxvt62iRyJxHdOWyWRRHUM"></script>
+    <script src="{% static 'home/home.js' %}"></script>
+</body>
+</html>

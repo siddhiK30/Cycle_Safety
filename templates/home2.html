@@ -1,0 +1,1402 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BICYKLE - Activity Dashboard</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css">
+    <style>
+       @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Space Grotesk', sans-serif;
+}
+.alert-header {
+            position: relative;
+            z-index: 100;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .alert-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-message {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 10px;
+            color: var(--warning);
+            font-weight: 500;
+        }
+
+        .buttons-wrapper {
+            position: relative;
+            z-index: 101;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .sos-button, .nearby-users-button {
+            position: relative;
+            z-index: 102;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sos-button {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .nearby-users-button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .popup-content {
+            position: relative;
+            background: var(--surface);
+            margin: 10% auto;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 16px;
+            color: var(--text);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .popup-header h2 {
+            font-size: 1.5rem;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .close-button {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover {
+            color: var(--text);
+        }
+
+        .users-list {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .user-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateX(4px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .user-details h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .distance {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status.online {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .status.offline {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+       
+        #usersList {
+            list-style: none;
+            padding: 0;
+        }
+
+        #usersList li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        @media (max-width: 600px) {
+            .alert-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .buttons-container {
+                justify-content: flex-end;
+            }
+        }
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --background: #171718;
+    --surface: #111827;
+    --surface-2: #1f2937;
+    --text: #f9fafb;
+    --text-secondary: #9ca3af;
+}
+
+body {
+    background: var(--background);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    padding: 20px;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.sidebar {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 700;
+    font-size: 24px;
+    background: linear-gradient(to right, var(--primary), #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.nav-item:hover {
+    background: var(--surface-2);
+    color: var(--text);
+    transform: translateX(4px);
+}
+
+.nav-item.active {
+    background: var(--primary);
+    color: white;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.alert-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 10px;
+    color: var(--warning);
+    font-weight: 500;
+}
+
+.sos-button {
+    padding: 12px 28px;
+    background: linear-gradient(135deg, var(--danger), #dc2626);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.sos-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.speed-tracker {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+}
+
+.camera-grid {
+    background: var(--surface);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fatigue-detection h2 {
+    padding: 20px;
+    font-size: 18px;
+    color: var(--text);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.camera-feed {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: var(--background);
+    overflow: hidden;
+}
+
+#videoFeed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.detection-status {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    backdrop-filter: blur(8px);
+}
+
+.status-awake {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: var(--success);
+}
+
+.status-drowsy {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: var(--danger);
+}
+
+.map-container {
+    position: relative;
+    height: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* Speedometer styles */
+.speedometer {
+    width: 100%;
+    height: 150px;
+    margin-bottom: 16px;
+}
+
+.speedometer-track {
+    transition: all 0.3s ease;
+}
+
+.speedometer-value {
+    transition: all 0.5s ease-out;
+}
+
+.current-speed {
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--primary);
+    transition: color 0.3s ease;
+    margin: 16px 0;
+}
+
+.speed-unit {
+    font-size: 16px;
+    opacity: 0.8;
+}
+
+.stat-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.stat {
+    padding: 16px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: 8px;
+}
+
+#voiceControls {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    gap: 12px;
+    z-index: 10;
+}
+
+.voice-button {
+    padding: 12px 24px;
+    background: var(--primary);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+}
+
+.voice-button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--surface-2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.sidebar, .header, .speed-tracker, .camera-grid {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            
+            <nav class="nav-menu">
+                <div class="nav-item active">
+                    <span>🏠</span>
+                    Home
+                </div>
+                <a href="/home/area_flag/" class="nav-item">
+                    <span>🔔</span>
+                    <span>Area and Crowd Flag</span>
+                </a>
+                <a href="/home/anomoly/" class="nav-item">
+                    <span>💳</span>
+                    <span>Anamalous Path</span>
+                </a>
+                <a href="/home/profile/" class="nav-item">
+                    <span>⚡</span>
+                    <span>RiderSafe Analytics</span>
+                </a>
+                <a href="/home/health/" class="nav-item">
+                    <span>📁</span>
+                    <span>Bicycle Health</span>
+                </a>
+                <a href="/home/mumbai_map/" class="nav-item">
+                    <span>📁</span>
+                    <span>offline Support</span>
+                </a>
+               
+            </nav>
+            
+        </div>
+
+        <div class="main-content">
+            <header class="header">
+                <div class="alert-container">
+                    <div class="alert-message">
+                        <span class="alert-icon">⚠️</span>
+                        <div class="msg">
+                            You are on a terrain!
+                        </div>
+                    </div>
+                    <div class="buttons-container">
+                        <button id="sosButton" class="sos-button">SOS</button>
+                        <button id="nearbyUsersButton" class="nearby-users-button">Nearby Users</button>
+                    </div>
+                </div>
+            
+                <!-- Popup for nearby users -->
+                <div id="nearbyUsersPopup" class="popup">
+                    <div class="popup-content">
+                        <div class="popup-header">
+                            <h2>Nearby Users</h2>
+                            <span class="close-button">&times;</span>
+                        </div>
+                        <div class="users-list">
+                            <div class="user-card">
+                                <div class="user-info">
+                                    <div class="user-avatar">👤</div>
+                                    <div class="user-details">
+                                        <h3>John Doe</h3>
+                                        <span class="distance">0.5 km away</span>
+                                    </div>
+                                </div>
+                                <span class="status online">Online</span>
+                            </div>
+                            <div class="user-card">
+                                <div class="user-info">
+                                    <div class="user-avatar">👤</div>
+                                    <div class="user-details">
+                                        <h3>Alice Smith</h3>
+                                        <span class="distance">1.2 km away</span>
+                                    </div>
+                                </div>
+                                <span class="status online">Online</span>
+                            </div>
+                            <div class="user-card">
+                                <div class="user-info">
+                                    <div class="user-avatar">👤</div>
+                                    <div class="user-details">
+                                        <h3>Bob Wilson</h3>
+                                        <span class="distance">2.0 km away</span>
+                                    </div>
+                                </div>
+                                <span class="status offline">Offline</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+           
+
+            <div class="dashboard">
+                <div class="left-section">
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        
+                                <div class="map-container">
+                                    <div id="alertBox" class="alert">
+                                        <strong>Alert!</strong><br>
+                                        <span id="alertMessage">Confirm if you are safe.</span><br>
+                                        <button onclick="handleConfirmSafety()" class="safe-button">I'm Safe</button>
+                                    </div>
+                                    <div id="map"></div>
+                                    <div id="voiceControls">
+                                        <button onclick="toggleVoiceGuidance()" class="voice-button" id="voiceToggle">Enable Voice</button>
+                                        <button onclick="speakCurrentInstruction()" class="voice-button">Repeat Instruction</button>
+                                    </div>
+                                </div>
+
+                        <div class="speed-tracker">
+                            <div class="svg-title">
+                                <h1>Speed</h1>
+                                <svg class="speedometer" viewBox="0 0 160 100">
+                                    <!-- Background track -->
+                                    <path 
+                                        class="speedometer-track"
+                                        d="M10,90 A70,70 0 0,1 150,90" 
+                                        fill="none" 
+                                        stroke="#333" 
+                                        stroke-width="3"
+                                    />
+                                        
+                                    <!-- Speed indicator -->
+                                    <path 
+                                        class="speedometer-value"
+                                        d="M10,90 A70,70 0 0,1 10,90" 
+                                        fill="none" 
+                                        stroke="#4CAF50" 
+                                        stroke-width="3"
+                                        stroke-linecap="round"
+                                    />
+                                        
+                                    <!-- Tick marks -->
+                                    <g id="ticks">
+                                        <line x1="10" y1="90" x2="15" y2="85" stroke="#666" />
+                                        <line x1="45" y1="65" x2="50" y2="60" stroke="#666" />
+                                        <line x1="85" y1="50" x2="90" y2="45" stroke="#666" />
+                                        <line x1="125" y1="65" x2="130" y2="60" stroke="#666" />
+                                        <line x1="150" y1="90" x2="145" y2="85" stroke="#666" />
+                                    </g>
+                                        
+                                    <!-- Speed labels -->
+                                    <text x="5" y="100" fill="#666" font-size="10">0</text>
+                                    <text x="80" y="40" fill="#666" font-size="10">20</text>
+                                    <text x="145" y="100" fill="#666" font-size="10">40</text>
+                                </svg>
+                        
+                                <div class="current-speed">
+                                    0.0 <span class="speed-unit">km/h</span>
+                                </div>
+                            </div>
+                        
+                            <div class="stat-info">
+                                <div class="stat">
+                                    <div>Avg</div>
+                                    <div class="stat-value average-speed">0.0</div>
+                                </div>
+                                <div class="stat">
+                                    <div>Max</div>
+                                    <div class="stat-value max-speed">0.0</div>
+                                </div>
+                                <div class="stat">
+                                    <div>Dist</div>
+                                    <div class="stat-value total-distance">0.0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>   
+                </div>
+            </div>
+            <!-- <div class="camera-grid">
+                <div class="fatigue-detection">
+                    <h2>Driver Fatigue Detection</h2>
+                    <div class="camera-feed">
+                        <video id="videoFeed" autoplay playsinline></video>
+                        <div class="detection-overlay">
+                            <div id="detectionStatus" class="detection-status status-awake">Awake</div>
+                            <div id="alertMessage" class="alert-message">
+                                Alert! You seem tired. Please take a break.
+                            </div>
+                        </div>
+                    </div>
+                </div>x
+            </div>
+            <div class="dashboard-grid">
+                <div class="map-container">
+                    <div id="alertBox" class="alert">
+                        <strong>Alert!</strong><br>
+                        <span id="alertMessage">Confirm if you are safe.</span><br>
+                        <button onclick="handleConfirmSafety()" class="safe-button">I'm Safe</button>
+                    </div>
+                    <div id="map"></div>
+                    <div id="voiceControls">
+                        <button onclick="toggleVoiceGuidance()" class="voice-button" id="voiceToggle">Enable Voice</button>
+                        <button onclick="speakCurrentInstruction()" class="voice-button">Repeat Instruction</button>
+                    </div>
+                </div>
+            </div> -->
+            <div class="dashboard-content">
+                <div class="camera-grid">
+                    <div class="fatigue-detection">
+                        <h2>Driver Fatigue Detection</h2>
+                        <div class="camera-feed">
+                            <video id="videoFeed" autoplay playsinline></video>
+                            <div class="detection-overlay">
+                                <div id="detectionStatus" class="detection-status status-awake">Awake</div>
+                                <div id="alertMessage" class="alert-message">
+                                    Alert! You seem tired. Please take a break.
+                                </div>
+                            </div>
+                        </div>
+                    
+                   
+                </div>
+                <div class="vehicle-detection">
+                    <h2>Vehicle Detection System</h2>
+                    <div class="camera-feed">
+                        <video id="vehicleVideoFeed" autoplay playsinline></video>
+                        <div class="detection-overlay">
+                            <div id="vehicleStatus" class="detection-status status-awake">Safe Distance</div>
+                        </div>
+                    </div>
+                    <div class="vehicle-info">
+                        <div class="info-box">
+                            <div class="info-label">Distance</div>
+                            <div class="info-value">12.5m</div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-label">Speed</div>
+                            <div class="info-value">45 km/h</div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-label">Warning Level</div>
+                            <div class="info-value">Low</div>
+                        </div>
+                    </div>
+                </div>
+            
+    
+                <!-- <div class="map-container">
+                    <div id="alertBox" class="alert">
+                        <strong>Alert!</strong><br>
+                        <span id="alertMessage">Confirm if you are safe.</span><br>
+                        <button onclick="handleConfirmSafety()" class="safe-button">I'm Safe</button>
+                    </div>
+                    <div id="map"></div>
+                    <div id="voiceControls">
+                        <button onclick="toggleVoiceGuidance()" class="voice-button" id="voiceToggle">Enable Voice</button>
+                        <button onclick="speakCurrentInstruction()" class="voice-button">Repeat Instruction</button>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+    </div>
+
+    <audio id="alertSound" class="alert-sound" loop>
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWFuYXZpMTIzIiwiYSI6ImNsc3hjdjAzcTAxb3kycXAya3IyNnl3djgifQ.vyfIAPnhABA9sgvga4F6XA';
+        
+        // Initialize variables
+let userLocation = null;
+let mapInstance = null;
+let directions = null;
+let routeCoords = [];
+let deviationAlert = false;
+let sosTimeout = null;
+let lastLocation = null;
+let lastMovementTime = Date.now();
+let stationaryTimeout = null;
+let stationaryCheckTimeout = null;
+let voiceEnabled = false;
+let currentStep = 0;
+let routeInstructions = [];
+const speechSynth = window.speechSynthesis;
+const safeDistanceThreshold = 0.005;
+const stationaryThreshold = 0.0001;
+const stationaryTimeLimit = 10000 * 60 * 1000;
+const sosDelay = 5 * 1000;
+
+// Initialize map and location tracking
+async function storeUserLocation(location) {
+    try {
+        await fetch('https://suraksha-84726-default-rtdb.firebaseio.com/users/N4iwwMbD5xViwkdjFSFk7dmQTyw2/location.json', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(location)
+        });
+    } catch (error) {
+        console.error('Error storing location:', error);
+    }
+}
+function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.getElementById('sosButton').addEventListener('click', function () {
+    isSOSActive = true;
+    startVideo();
+    
+    // Show the "Ask All for Help" button
+    const askAllButton = document.getElementById('askAllForHelp');
+    askAllButton.classList.remove('hidden');
+    askAllButton.classList.add('visible');
+
+    // Add location fetching and sending SOS SMS
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+
+                // Send SOS message to the backend
+                fetch("/send-sos/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    },
+                    body: JSON.stringify({ latitude, longitude }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        alert(data.message); // Notify user
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+
+                // Additionally, send location as part of the SOS alert
+                sendSOSAlert(latitude, longitude);
+            },
+            (error) => {
+                alert("Unable to fetch location. Please enable GPS.");
+            }
+        );
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+});
+function initMap() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const { latitude, longitude } = position.coords;
+                userLocation = { latitude, longitude };
+                lastLocation = { latitude, longitude };
+                storeUserLocation({ latitude, longitude });
+                setupMap();
+                startStationaryCheck();
+            },
+            error => {
+                console.error("Error getting location:", error);
+                alert("Unable to retrieve your location. Please ensure location services are enabled.");
+            }
+        );
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+}
+
+// Voice navigation functions
+function toggleVoiceGuidance() {
+    voiceEnabled = !voiceEnabled;
+    const button = document.getElementById('voiceToggle');
+    button.textContent = voiceEnabled ? 'Disable Voice' : 'Enable Voice';
+    if (voiceEnabled && routeInstructions.length > 0) {
+        speakCurrentInstruction();
+    }
+}
+
+function speakCurrentInstruction() {
+    if (routeInstructions.length > 0 && currentStep < routeInstructions.length) {
+        const utterance = new SpeechSynthesisUtterance(routeInstructions[currentStep]);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        speechSynth.speak(utterance);
+    }
+}
+
+function setupMap() {
+    mapInstance = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [userLocation.longitude, userLocation.latitude],
+        zoom: 14
+    });
+
+    directions = new MapboxDirections({
+        accessToken: mapboxgl.accessToken,
+        unit: 'metric',
+        profile: 'mapbox/driving'
+    });
+    mapInstance.addControl(directions, 'top-left');
+
+    new mapboxgl.Marker({ color: '#4B0082' })
+        .setLngLat([userLocation.longitude, userLocation.latitude])
+        .addTo(mapInstance)
+        .setPopup(new mapboxgl.Popup().setText('You are here'));
+
+    directions.on('route', e => {
+        if (e.route && e.route[0]) {
+            routeCoords = e.route[0].geometry.coordinates;
+            routeInstructions = e.route[0].legs[0].steps.map(step => step.maneuver.instruction);
+            currentStep = 0;
+            monitorRoute(routeCoords);
+            if (voiceEnabled) {
+                speakCurrentInstruction();
+            }
+        }
+    });
+}
+
+function startStationaryCheck() {
+    if (stationaryCheckTimeout) {
+        clearTimeout(stationaryCheckTimeout);
+    }
+    stationaryCheckTimeout = setInterval(checkStationary, 10000);
+}
+
+function checkStationary() {
+    if (lastLocation && !deviationAlert) {
+        const timeSinceLastMovement = Date.now() - lastMovementTime;
+        if (timeSinceLastMovement >= stationaryTimeLimit) {
+            handleStationary();
+        }
+    }
+}
+
+function calculateDistanceToNextStep(currentCoords, routeCoords) {
+    const nextWaypoint = routeCoords[currentStep + 1];
+    if (!nextWaypoint) return Infinity;
+    
+    return Math.sqrt(
+        Math.pow(currentCoords[0] - nextWaypoint[0], 2) + 
+        Math.pow(currentCoords[1] - nextWaypoint[1], 2)
+    );
+}
+
+function monitorRoute(routeCoords) {
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+            position => {
+                const { latitude, longitude } = position.coords;
+                storeUserLocation({ latitude, longitude });
+
+                if (lastLocation) {
+                    const movement = Math.sqrt(
+                        Math.pow(longitude - lastLocation.longitude, 2) + 
+                        Math.pow(latitude - lastLocation.latitude, 2)
+                    );
+                    if (movement > stationaryThreshold) {
+                        lastMovementTime = Date.now();
+                    }
+                }
+
+                lastLocation = { latitude, longitude };
+
+                if (Array.isArray(routeCoords) && routeCoords.length > 0) {
+                    const isDeviating = checkDeviation([longitude, latitude], routeCoords);
+                    
+                    if (voiceEnabled && routeInstructions.length > 0) {
+                        const distanceToNextStep = calculateDistanceToNextStep([longitude, latitude], routeCoords);
+                        if (distanceToNextStep < 0.0001 && currentStep < routeInstructions.length - 1) {
+                            currentStep++;
+                            speakCurrentInstruction();
+                        }
+                    }
+
+                    if (isDeviating) {
+                        handleDeviation();
+                    } else if (deviationAlert) {
+                        clearTimeout(sosTimeout);
+                        deviationAlert = false;
+                        document.getElementById('alertBox').style.display = 'none';
+                    }
+                }
+            },
+            error => console.error("Error watching position:", error)
+        );
+    }
+}
+
+function checkDeviation(currentCoords, routeCoords) {
+    if (!Array.isArray(routeCoords) || routeCoords.length === 0) return false;
+    return !routeCoords.some(([lng, lat]) => {
+        const distance = Math.sqrt(
+            Math.pow(currentCoords[0] - lng, 2) + Math.pow(currentCoords[1] - lat, 2)
+        );
+        return distance < safeDistanceThreshold;
+    });
+}
+const nearbyUsersButton = document.getElementById('nearbyUsersButton');
+        const popup = document.getElementById('nearbyUsersPopup');
+        const closeButton = document.querySelector('.close-button');
+
+        nearbyUsersButton.addEventListener('click', () => {
+            popup.style.display = 'block';
+        });
+
+        closeButton.addEventListener('click', () => {
+            popup.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === popup) {
+                popup.style.display = 'none';
+            }
+        });
+function getCookie(name) {
+    const value = document.cookie;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+function sendSosAlert() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                
+                fetch("/send-sos/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken")
+                    },
+                    body: JSON.stringify({ latitude, longitude }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("SOS sent successfully:", data);
+                    alert("Emergency contacts have been notified!");
+                })
+                .catch(error => {
+                    console.error("Error sending SOS:", error);
+                    alert("Failed to send emergency alert.");
+                });
+            },
+            (error) => {
+                alert("Unable to fetch location. Please enable GPS.");
+            }
+        );
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+}
+
+let alertSound = document.getElementById('alertSound');
+let alertModal = document.getElementById('alertModal');
+
+function showAlert(message, isEmergency = false) {
+    document.getElementById('alertMessage').textContent = message;
+    document.getElementById('alertBox').style.display = 'block';
+    
+    document.getElementById('modalMessage').textContent = message;
+    alertModal.style.display = 'flex';
+    
+    alertSound.play();
+    
+    if (Notification.permission === "granted") {
+        new Notification("Safety Alert", { body: message });
+        alertSound.pause();
+    }
+    
+    if (isEmergency) {
+        alert(message);
+        alertSound.pause();
+    }
+}
+
+function handleStationary() {
+    if (!deviationAlert) {
+        deviationAlert = true;
+        showAlert('You haven\'t moved for 8 minutes. Are you safe?');
+        sosTimeout = setTimeout(() => {
+            console.log("sendSosAlert");
+            sendSosAlert();
+            alertSound.pause();   
+        }, sosDelay);
+    }
+}
+
+function handleDeviation() {
+    if (!deviationAlert) {
+        deviationAlert = true;
+        showAlert('Deviation Detected! Confirm if you are safe.');
+        sosTimeout = setTimeout(() => {
+            showAlert('Emergency: No response received! Sending SOS Alert!', true);
+            sendSosAlert();
+        }, sosDelay);
+    }
+}
+
+function handleConfirmSafety() {
+    deviationAlert = false;
+    document.getElementById('alertBox').style.display = 'none';
+    alertModal.style.display = 'none';
+    alertSound.pause();
+    alertSound.currentTime = 0;
+    clearTimeout(sosTimeout);
+    lastMovementTime = Date.now();
+}
+
+function requestNotificationPermission() {
+    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+    }
+}
+
+// Initialize everything
+function init() {
+    initMap();
+    requestNotificationPermission();
+}
+const API_URL = "https://detect.roboflow.com/driver-fatigue/2";
+        const API_KEY = "7y9E0pW7t5IcONqrvdVn";
+        let lastAlertTime = 0;
+        const ALERT_COOLDOWN = 10000; // 10 seconds in milliseconds
+
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('videoFeed');
+                video.srcObject = stream;
+
+                // Start detection loop
+                setInterval(detectFatigue, 1000);
+            } catch (error) {
+                console.error("Error accessing camera:", error);
+            }
+        }
+        async function detectFatigue() {
+    const video = document.getElementById('videoFeed');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+
+    // Convert canvas to blob
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+    const formData = new FormData();
+    formData.append('file', blob);
+
+    // Function to speak alerts using Web Speech API
+    function speakAlert(message) {
+        const speech = new SpeechSynthesisUtterance(message);
+        speech.rate = 0.9;  // Slightly slower rate for clarity
+        speech.pitch = 1;   // Normal pitch
+        speech.volume = 1;  // Full volume
+        window.speechSynthesis.speak(speech);
+    }
+
+    try {
+        const response = await fetch(`${API_URL}?api_key=${API_KEY}`, {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+
+        if (result.predictions) {
+            const currentTime = Date.now();
+            const statusElement = document.getElementById('detectionStatus');
+            const alertElement = document.getElementById('alertMessage');
+
+            for (const prediction of result.predictions) {
+                if (prediction.class.toLowerCase().includes('drowsy')) {
+                    statusElement.className = 'detection-status status-drowsy';
+                    statusElement.textContent = 'Drowsy';
+
+                    if (currentTime - lastAlertTime >= ALERT_COOLDOWN) {
+                        alertElement.style.display = 'block';
+                        
+                        // Speak the alert message
+                        speakAlert("Alert! You seem tired. Please take a break and freshen up for your safety.");
+                        lastAlertTime = currentTime;
+
+                        // Hide alert after 10 seconds
+                        setTimeout(() => {
+                            alertElement.style.display = 'none';
+                        }, 10000);
+                    }
+                } else {
+                    statusElement.className = 'detection-status status-awake';
+                    statusElement.textContent = 'Awake';
+                    alertElement.style.display = 'none';
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Error during fatigue detection:", error);
+    }
+}
+function handleDeviation() {
+            if (!deviationAlert) {
+                deviationAlert = true;
+                // Set a 30-second delay before showing the alert
+                setTimeout(() => {
+                    showAlert('Deviation Detected! Confirm if you are safe.');
+                    sosTimeout = setTimeout(() => {
+                        showAlert('Emergency: No response received! Sending SOS Alert!', true);
+                        sendSosAlert();
+                    }, sosDelay);
+                }, 30000); // 30 seconds delay
+            }
+        }
+
+        function handleStationary() {
+            if (!deviationAlert) {
+                deviationAlert = true;
+                // Set an 8-minute delay before showing the alert
+                setTimeout(() => {
+                    showAlert('You haven\'t moved for 8 minutes. Are you safe?');
+                    sosTimeout = setTimeout(() => {
+                        sendSosAlert();
+                        alertSound.pause();   
+                    }, sosDelay);
+                }, 480000); // 8 minutes delay
+            }
+        }
+        // Initialize
+        initCamera();
+// Start the application
+initMap();
+class SpeedTracker {
+    constructor() {
+        this.maxSpeed = 40; // Maximum speed on the speedometer
+        this.currentSpeed = 0;
+        this.speeds = [];
+        this.distance = 0;
+        
+        // Cache DOM elements
+        this.speedDisplay = document.querySelector('.current-speed');
+        this.speedometer = document.querySelector('.speedometer-value');
+        this.avgSpeedDisplay = document.querySelector('.average-speed');
+        this.maxSpeedDisplay = document.querySelector('.max-speed');
+        this.distanceDisplay = document.querySelector('.total-distance');
+        
+        // Initialize colors
+        this.speedColors = {
+            low: '#4CAF50',    // Green
+            medium: '#FFA726', // Orange
+            high: '#EF5350'    // Red
+        };
+    }
+
+    // Calculate the SVG path for the speedometer arc
+    calculateArc(speed) {
+        const percentage = speed / this.maxSpeed;
+        const endAngle = 180 * percentage;
+        const x = 10 + 140 * percentage;
+        const y = 90 - Math.sin(endAngle * Math.PI / 180) * 70;
+        return `M10,90 A70,70 0 0,1 ${x},${y}`;
+    }
+
+    // Update the speedometer color based on speed
+    updateColor(speed) {
+        let color;
+        if (speed < this.maxSpeed * 0.4) {
+            color = this.speedColors.low;
+        } else if (speed < this.maxSpeed * 0.7) {
+            color = this.speedColors.medium;
+        } else {
+            color = this.speedColors.high;
+        }
+        
+        this.speedometer.style.stroke = color;
+        this.speedDisplay.style.color = color;
+    }
+
+    // Update statistics
+    updateStats() {
+        // Calculate average speed
+        const avgSpeed = this.speeds.length > 0 
+            ? this.speeds.reduce((a, b) => a + b) / this.speeds.length 
+            : 0;
+        
+        // Update displays
+        this.avgSpeedDisplay.textContent = avgSpeed.toFixed(1);
+        this.maxSpeedDisplay.textContent = Math.max(...this.speeds, 0).toFixed(1);
+        this.distanceDisplay.textContent = this.distance.toFixed(1);
+    }
+
+    // Set new speed value
+    setSpeed(speed) {
+        // Clamp speed between 0 and maxSpeed
+        this.currentSpeed = Math.min(Math.max(speed, 0), this.maxSpeed);
+        
+        // Update speedometer
+        this.speedometer.setAttribute('d', this.calculateArc(this.currentSpeed));
+        this.speedDisplay.textContent = `${this.currentSpeed.toFixed(1)} `;
+        
+        // Update color
+        this.updateColor(this.currentSpeed);
+        
+        // Update statistics
+        this.speeds.push(this.currentSpeed);
+        // Keep only last 10 readings for average
+        if (this.speeds.length > 10) this.speeds.shift();
+        
+        // Update distance (simplified calculation)
+        this.distance += (this.currentSpeed / 3600); // km/h to km
+        
+        this.updateStats();
+    }
+
+    // Simulate speed changes (for testing)
+    startSimulation() {
+        let time = 0;
+        const interval = setInterval(() => {
+            // Simulate varying speed using sine wave
+            const speed = 20 + Math.sin(time) * 15;
+            this.setSpeed(speed);
+            time += 0.1;
+        }, 100);
+
+        return () => clearInterval(interval); // Return cleanup function
+    }
+}
+
+// Initialize the speed tracker
+const speedTracker = new SpeedTracker();
+
+// Example usage:
+// speedTracker.setSpeed(25); // Set speed to 25 km/h
+// speedTracker.startSimulation(); // Start speed simulation
+
+// For testing: simulate random speed updates
+function simulateSpeed() {
+    const speed = Math.random() * 40; // Random speed between 0 and 40
+    speedTracker.setSpeed(speed);
+}
+
+// Update speed every 2 seconds for demonstration
+setInterval(simulateSpeed, 2000);
+    </script>
+</body>
+</html> -->

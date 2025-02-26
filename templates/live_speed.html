@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Bicycle Speed Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f0f0f0;
+        }
+        .speed-display {
+            font-size: 3rem;
+            font-weight: bold;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Live Bicycle Speed Tracker 🚴</h1>
+    <p id="status">Waiting for GPS signal...</p>
+    <div class="speed-display" id="speed">0.00 km/h</div>
+
+    <script>
+        let lastPosition = null;
+        let lastTimestamp = null;
+    
+        function calculateSpeed(position) {
+            const { latitude, longitude, speed, timestamp } = position.coords;
+            console.log("GPS Data:", position.coords); // Debugging
+    
+            document.getElementById("status").innerText = "Tracking...";
+    
+            if (speed !== null) {
+                document.getElementById("speed").innerText = `${(speed * 3.6).toFixed(2)} km/h`;
+            } else if (lastPosition && lastTimestamp) {
+                const distance = getDistanceFromLatLon(lastPosition.lat, lastPosition.lon, latitude, longitude);
+                const timeDiff = (timestamp - lastTimestamp) / 1000; // Convert ms to seconds
+                if (timeDiff > 0) {
+                    const calculatedSpeed = distance / timeDiff; // m/s
+                    document.getElementById("speed").innerText = `${(calculatedSpeed * 3.6).toFixed(2)} km/h`;
+                }
+            } else {
+                document.getElementById("speed").innerText = "Move to calculate speed!";
+            }
+    
+            lastPosition = { lat: latitude, lon: longitude };
+            lastTimestamp = timestamp;
+        }
+    
+        function getDistanceFromLatLon(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Earth radius in meters
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // Distance in meters
+        }
+    
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition(calculateSpeed, (error) => {
+                document.getElementById("status").innerText = "GPS error: " + error.message;
+            }, { enableHighAccuracy: true, maximumAge: 1000 });
+        } else {
+            alert("Geolocation is not supported by your browser.");
+        }
+    </script>
+    
+
+</body>
+</html>

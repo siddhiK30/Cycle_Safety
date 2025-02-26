@@ -1,0 +1,69 @@
+# templates/vehicle_detection/results.html
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Detection Results</h2>
+                <a href="{% url 'upload_video' %}" class="btn btn-primary">Upload New Video</a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        {% if results %}
+            {% for result in results %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">{{ result.video.title }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    Processed: {{ result.detection_date|date:"F j, Y, g:i a" }}
+                                </small>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-4">
+                                    <div class="text-center">
+                                        <div class="h4">{{ result.total_vehicles }}</div>
+                                        <small class="text-muted">Vehicles</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-center">
+                                        <div class="h4">{{ result.average_speed|floatformat:1 }}</div>
+                                        <small class="text-muted">Avg Speed</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-center">
+                                        <div class="h4">{{ result.danger_incidents }}</div>
+                                        <small class="text-muted">Incidents</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if result.processed_video %}
+                                <div class="video-container">
+                                    <video controls>
+                                        <source src="{{ result.processed_video.url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No detection results found. <a href="{% url 'upload_video' %}">Upload a video</a> to get started.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
